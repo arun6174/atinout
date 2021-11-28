@@ -1,35 +1,37 @@
-VERSION	= 0.9.1
+include $(TOPDIR)/rules.mk
 
-PREFIX	= /usr
+PKG_NAME:=atinout
+PKG_VERSION:=0.9.1
+#PKG_RELEASE:=1
 
-CC	?= gcc
-CFLAGS	?= -W -Wall -Wextra -Werror \
-	-DVERSION=\"$(VERSION)\" \
-	-g
-LDFLAGS ?=
+PKG_BUILD_DIR := $(BUILD_DIR)/$(PKG_NAME)
 
-all: atinout
 
-atinout: atinout.c
-	$(CC) -o $@ $(CFLAGS) $(LDFLAGS) $^
+include $(INCLUDE_DIR)/package.mk
 
-ifeq "REMOVE_THIS_FOR_RELEASE" "REMOVE_THIS_FOR_RELEASE"
+define Package/atinout
+	SECTION:=net
+	CATEGORY:=Network
+	TITLE:=atinout
+	DEPENDS:=
+endef
 
-dist:
-	make -f make.dist dist_tar_file
+define Package/atinout/description
+	Execute AT commands in sequence and capture the response from the modem.
+endef
 
-atinout.1 atinout.1.html: atinout.1.ronn
-	ronn $^
+#TARGET_CFLAGS += -ggdb3
 
-clean:
-	rm -f atinout atinout.1 atinout.1.html atinout.spec
-else
-clean:
-	rm -f atinout
-endif
+define Build/Prepare
+	mkdir -p $(PKG_BUILD_DIR)
+	$(CP) ./src/* $(PKG_BUILD_DIR)/
+endef
 
-install: all
-	mkdir -p $(DESTDIR)$(PREFIX)/bin
-	cp atinout $(DESTDIR)$(PREFIX)/bin
-	mkdir -p $(DESTDIR)$(PREFIX)/share/man/man1
-	cp atinout.1 $(DESTDIR)$(PREFIX)/share/man/man1/atinout.1
+
+define Package/atinout/install
+	$(INSTALL_DIR) $(1)/bin
+	$(INSTALL_BIN) $(PKG_BUILD_DIR)/atinout $(1)/bin/
+endef
+
+
+$(eval $(call BuildPackage,atinout))
